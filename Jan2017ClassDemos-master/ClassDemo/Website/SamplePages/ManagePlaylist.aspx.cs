@@ -18,6 +18,10 @@ public partial class SamplePages_ManagePlaylist : System.Web.UI.Page
         {
             Response.Redirect("~/Account/Login.aspx");
         }
+        else
+        {
+            TracksSelectionList.DataSource = null;
+        }
     }
 
     protected void CheckForException(object sender, ObjectDataSourceStatusEventArgs e)
@@ -114,6 +118,13 @@ public partial class SamplePages_ManagePlaylist : System.Web.UI.Page
             string username = User.Identity.Name;
             //obtain the playlist name
             string playlistname = PlaylistName.Text;
+            //the trackid is attached to each ListView row via the CommandArgument parameter
+
+            //this method does not make the value visible to the user (or in view source unless
+            //   the hacker decompressed the hidden data)
+
+            //access to the trackid is done via the ListViewCommandEventsArgs e and is treated
+            //as an object, thus it needs to be cast to a string for the Parse to work
             int trackid = int.Parse(e.CommandArgument.ToString());
 
             //contect to BLL controller
@@ -242,15 +253,61 @@ public partial class SamplePages_ManagePlaylist : System.Web.UI.Page
         MessageUserControl.TryRun(() =>
         {
             PlaylistTracksController sysmgr = new PlaylistTracksController();
-            //sysmgr.Add_TrackToPLaylist(playlistname, username, trackid);
+            sysmgr.MoveTrack(User.Identity.Name, PlaylistName.Text, trackid, tracknumber, direction.ToUpper());
             List<UserPlaylistTrack> results = sysmgr.List_TracksForPlaylist(PlaylistName.Text, 
                 User.Identity.Name);
             PlayList.DataSource = results;
             PlayList.DataBind();
-        }, "Playlist Track Added", "You have successfully added a new track to your list.");
+        }, "Track Moved", "Track has been moved " + direction);
     }
     protected void DeleteTrack_Click(object sender, EventArgs e)
     {
-
+        //is there a playlist displayed
+        if (PlayList.Rows.Count == 0)
+        {
+            MessageUserControl.ShowInfo("Warning", "No playlist has been retreived.");
+        }
+        else
+        {
+            //check playlist name is present
+            if (string.IsNullOrEmpty(PlaylistName.Text))
+            {
+                MessageUserControl.ShowInfo("Warning", "You must have a playlist name.");
+            }
+            else
+            {
+                //check at least one item checked
+                //collect trackids (hidden) 
+                List<int> trackstodelete = new List<int>();
+                int rowsselected = 0;
+                CheckBox playlistselection = null;
+                for (int i = 0; i < PlayList.Rows.Count; i++)
+                {
+                    playlistselection = PlayList.Rows[i].FindControl("Selected") as CheckBox;
+                    if (playlistselection.Checked)
+                    {
+                        trackstodelete.Add(int.Parse((PlayList.Rows[i].FindControl("TrackId") as Label).Text));
+                        rowsselected++;
+                    }
+                }
+                if (rowsselected == 0)
+                {
+                    MessageUserControl.ShowInfo("Warning", "Select one or more tracks to delete.");
+                }
+                else
+                {
+                    //call delete
+                    MessageUserControl.TryRun(() =>
+                    {
+                        PlaylistTracksController sysmgr = new PlaylistTracksController();
+                        sysmgr.DeleteTracks(User.Identity.Name, PlaylistName.Text, trackstodelete);
+                        List<UserPlaylistTrack> playlistdata = sysmgr.List_TracksForPlaylist(PlaylistName.Text,
+                                                            User.Identity.Name);
+                        PlayList.DataSource = playlistdata;
+                        PlayList.DataBind();
+                    }, "Removed", "Tracks has been removed.");
+                }
+            }
+        }
     }
 }

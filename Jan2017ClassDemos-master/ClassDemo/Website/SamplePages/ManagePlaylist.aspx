@@ -173,36 +173,36 @@
         </asp:LinkButton>
         <br /><br />
         <asp:GridView ID="PlayList" runat="server" AutoGenerateColumns="False"
-             GridLines="Horizontal" BorderStyle="None">
+             Caption="PlayList" GridLines="Horizontal" BorderStyle="None">
             <Columns>
                 <asp:TemplateField >
                     <ItemTemplate>
                         <asp:CheckBox ID="Selected" runat="server" />
-                        <asp:Label runat="server" 
+                        <asp:Label runat="server" ID="TrackId"
                             Text='<%# Eval("TrackID") %>' Visible="false"></asp:Label>
                     </ItemTemplate>
                 </asp:TemplateField>
                 <asp:TemplateField HeaderText="Track">
                     <ItemTemplate>
-                        <asp:Label runat="server" 
+                        <asp:Label runat="server" ID="TrackNumber"
                             Text='<%# Eval("TrackNumber") %>'></asp:Label>
                     </ItemTemplate>
                 </asp:TemplateField>
                 <asp:TemplateField HeaderText="Name">
                     <ItemTemplate>
-                        <asp:Label runat="server" 
+                        <asp:Label runat="server" ID="TrachName"
                             Text='<%# Eval("TrackName") %>'></asp:Label>
                     </ItemTemplate>
                 </asp:TemplateField>
-                <asp:TemplateField HeaderText="Time">
+                <asp:TemplateField HeaderText="Time (m:s)">
                     <ItemTemplate>
-                        <asp:Label runat="server" 
+                        <asp:Label runat="server" ID="Milliseconds"
                             Text='<%# string.Format("{0:0.0}", (int)Eval("Milliseconds")/60000m)  %>'></asp:Label>
                     </ItemTemplate>
                 </asp:TemplateField>
                 <asp:TemplateField HeaderText="($)">
                     <ItemTemplate>
-                        <asp:Label runat="server" 
+                        <asp:Label runat="server" ID="UnitPrice"
                             Text='<%# Eval("UnitPrice") %>'></asp:Label>
                     </ItemTemplate>
                 </asp:TemplateField>
